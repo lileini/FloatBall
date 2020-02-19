@@ -30,14 +30,14 @@ public class MainActivity extends Activity {
         boolean showMenu = true;//换成false试试
         initSinglePageFloatball(showMenu);
         //5 如果没有添加菜单，可以设置悬浮球点击事件
-        if (mFloatballManager.getMenuItemSize() == 0) {
-            mFloatballManager.setOnFloatBallClickListener(new FloatBallManager.OnFloatBallClickListener() {
-                @Override
-                public void onFloatBallClick() {
-                    toast("点击了悬浮球");
-                }
-            });
-        }
+//        if (mFloatballManager.getMenuItemSize() == 0) {
+//            mFloatballManager.setOnFloatBallClickListener(new FloatBallManager.OnFloatBallClickListener() {
+//                @Override
+//                public void onFloatBallClick() {
+//                    toast("点击了悬浮球");
+//                }
+//            });
+//        }
     }
 
     @Override
@@ -136,12 +136,12 @@ public class MainActivity extends Activity {
                 mFloatballManager.closeMenu();
             }
         };
-        mFloatballManager.addMenuItem(personItem)
-                .addMenuItem(walletItem)
-                .addMenuItem(personItem)
-                .addMenuItem(walletItem)
-                .addMenuItem(settingItem)
-                .buildMenu();
+//        mFloatballManager.addMenuItem(personItem)
+//                .addMenuItem(walletItem)
+//                .addMenuItem(personItem)
+//                .addMenuItem(walletItem)
+//                .addMenuItem(settingItem)
+//                .buildMenu();
     }
 
 

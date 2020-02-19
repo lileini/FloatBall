@@ -4,18 +4,25 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.huxq17.example.floatball.permission.FloatPermissionManager;
 import com.huxq17.floatball.libarary.FloatBallManager;
+import com.huxq17.floatball.libarary.FloatBallUtil;
 import com.huxq17.floatball.libarary.floatball.FloatBallCfg;
 import com.huxq17.floatball.libarary.menu.FloatMenuCfg;
 import com.huxq17.floatball.libarary.menu.MenuItem;
@@ -26,13 +33,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class MainActivity extends Activity {
-    private final String TAG  = getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
     private FloatBallManager mFloatballManager;
     private FloatPermissionManager mFloatPermissionManager;
     private ActivityLifeCycleListener mActivityLifeCycleListener = new ActivityLifeCycleListener();
     private int resumed;
     boolean showMenu = true;//换成false试试
+
     public void showFloatBall(View v) {
         mFloatballManager.show();
 //        setFullScreen(v);
@@ -55,7 +63,7 @@ public class MainActivity extends Activity {
                     }
                 });
             }*/
-        }else {
+        } else {
             try {
                 commonROMPermissionApplyInternal(this);
             } catch (NoSuchFieldException e) {
@@ -68,6 +76,7 @@ public class MainActivity extends Activity {
         //6 如果想做成应用内悬浮球，可以添加以下代码。
 //        getApplication().registerActivityLifecycleCallbacks(mActivityLifeCycleListener);
     }
+
     public boolean check(Context context) {
         boolean result = true;
         if (Build.VERSION.SDK_INT >= 23) {
@@ -85,7 +94,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!showMenu){
+        if (!showMenu) {
             init(showMenu);
             //5 如果没有添加菜单，可以设置悬浮球点击事件
             /*if (mFloatballManager.getMenuItemSize() == 0) {
@@ -113,7 +122,7 @@ public class MainActivity extends Activity {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         mFloatballManager.show();
-        mFloatballManager.onFloatBallClick();
+//        mFloatballManager.onFloatBallClick();
     }
 
     @Override
@@ -150,16 +159,17 @@ public class MainActivity extends Activity {
 
     private void initSinglePageFloatball(boolean showMenu) {
         //1 初始化悬浮球配置，定义好悬浮球大小和icon的drawable
-        int ballSize = DensityUtil.dip2px(this, 45);
-        Drawable ballIcon = BackGroudSeletor.getdrawble("ic_floatball", this);
+        int ballSize = DensityUtil.dip2px(this, 116);
+//        Drawable ballIcon = BackGroudSeletor.getdrawble("ic_floatball", this);
+        Drawable ballIcon = getResources().getDrawable(R.drawable.ic_float_ball);
         FloatBallCfg ballCfg = new FloatBallCfg(ballSize, ballIcon, FloatBallCfg.Gravity.RIGHT_CENTER);
         //设置悬浮球不半隐藏
 //        ballCfg.setHideHalfLater(false);
         if (showMenu) {
             //2 需要显示悬浮菜单
             //2.1 初始化悬浮菜单配置，有菜单item的大小和菜单item的个数
-            int menuSize = DensityUtil.dip2px(this, 180);
-            int menuItemSize = DensityUtil.dip2px(this, 40);
+            int menuSize = DensityUtil.dip2px(this, 360);
+            int menuItemSize = DensityUtil.dip2px(this, 116);
             FloatMenuCfg menuCfg = new FloatMenuCfg(menuSize, menuItemSize);
             //3 生成floatballManager
             //必须传入Activity
@@ -172,39 +182,95 @@ public class MainActivity extends Activity {
     }
 
     private void addFloatMenuItem() {
-        MenuItem personItem = new MenuItem(BackGroudSeletor.getdrawble("ic_weixin", this)) {
+        MenuItem navigationItem = new MenuItem(getResources().getDrawable(R.drawable.ic_navigation)) {
             @Override
             public void action() {
-                toast("打开微信");
+                toast("打开导航");
                 mFloatballManager.closeMenu();
             }
         };
-        MenuItem walletItem = new MenuItem(BackGroudSeletor.getdrawble("ic_weibo", this)) {
+        MenuItem musicItem = new MenuItem(getResources().getDrawable(R.drawable.ic_music)) {
             @Override
             public void action() {
-                toast("打开微博");
-            }
-        };
-        MenuItem settingItem = new MenuItem(BackGroudSeletor.getdrawble("ic_email", this)) {
-            @Override
-            public void action() {
-                toast("打开邮箱");
+                toast("打开音乐");
                 mFloatballManager.closeMenu();
             }
         };
-        mFloatballManager.addMenuItem(personItem)
-                .addMenuItem(walletItem)
-                .addMenuItem(personItem)
-//                .addMenuItem(walletItem)
-                .addMenuItem(settingItem)
-                .buildMenu();
+        MenuItem phoneItem = new MenuItem(getResources().getDrawable(R.drawable.ic_phone)) {
+            @Override
+            public void action() {
+                toast("打开电话");
+                mFloatballManager.closeMenu();
+            }
+        };
+        MenuItem radioItem = new MenuItem(getResources().getDrawable(R.drawable.ic_radio)) {
+            @Override
+            public void action() {
+                toast("打开收音机");
+                mFloatballManager.closeMenu();
+            }
+        };
+//        mFloatballManager.addMenuItem(navigationItem)
+//                .addMenuItem(musicItem)
+//                .addMenuItem(phoneItem)
+//                .addMenuItem(radioItem)
+//                .buildMenu();
+
+
+//        test();
+    }
+
+    private boolean mExpend;
+    View view;
+    private static final int MSG_EXPEND = 13;
+    private static final int MSG_PACK_UP = MSG_EXPEND + 1;
+    private Handler mAnimationHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            switch (message.what) {
+                case MSG_EXPEND:
+                    view.setBackgroundResource(R.drawable.pack_up_floatball);
+                    mExpend = true;
+                    break;
+                case MSG_PACK_UP:
+                    view.setBackgroundResource(R.drawable.expend_floatball);
+                    mExpend = false;
+                    break;
+            }
+            return false;
+        }
+    });
+
+    private void test() {
+        WindowManager mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        view = LayoutInflater.from(this).inflate(R.layout.test_view, null);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                Log.d(TAG, "v: test_view");
+                AnimationDrawable background = (AnimationDrawable) view.getBackground();
+                background.start();
+                if (!mExpend) {
+                    int time = 33*36;
+                    mAnimationHandler.sendEmptyMessageDelayed(MSG_EXPEND,time);
+                } else {
+                    background.start();
+                    int time = 33*36;
+                    mAnimationHandler.sendEmptyMessageDelayed(MSG_PACK_UP,time);
+                }
+            }
+        });
+        WindowManager.LayoutParams layoutParams = FloatBallUtil.getLayoutParams(this);
+        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+        mWindowManager.addView(view, layoutParams);
     }
 
 
     private void init(boolean showMenu) {
         //1 初始化悬浮球配置，定义好悬浮球大小和icon的drawable
-        int ballSize = DensityUtil.dip2px(this, 45);
-        Drawable ballIcon = BackGroudSeletor.getdrawble("ic_floatball", this);
+        int ballSize = DensityUtil.dip2px(this, 116);
+//        Drawable ballIcon = BackGroudSeletor.getdrawble("ic_floatball", this);
+        Drawable ballIcon = getResources().getDrawable(R.drawable.ic_float_ball);
         //可以尝试使用以下几种不同的config。
 //        FloatBallCfg ballCfg = new FloatBallCfg(ballSize, ballIcon);
 //        FloatBallCfg ballCfg = new FloatBallCfg(ballSize, ballIcon, FloatBallCfg.Gravity.LEFT_CENTER,false);
@@ -216,8 +282,8 @@ public class MainActivity extends Activity {
         if (showMenu) {
             //2 需要显示悬浮菜单
             //2.1 初始化悬浮菜单配置，有菜单item的大小和菜单item的个数
-            int menuSize = DensityUtil.dip2px(this, 180);
-            int menuItemSize = DensityUtil.dip2px(this, 40);
+            int menuSize = DensityUtil.dip2px(this, 360);
+            int menuItemSize = DensityUtil.dip2px(this, 116);
             FloatMenuCfg menuCfg = new FloatMenuCfg(menuSize, menuItemSize);
             //3 生成floatballManager
             mFloatballManager = new FloatBallManager(getApplicationContext(), ballCfg, menuCfg);

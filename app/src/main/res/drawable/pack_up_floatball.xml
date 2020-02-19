@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+
+    <item android:drawable="@drawable/floatball_065" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_066" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_067" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_068" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_069" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_070" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_071" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_072" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_073" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_074" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_075" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_076" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_077" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_078" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_079" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_080" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_081" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_082" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_083" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_084" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_085" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_086" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_087" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_088" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_089" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_090" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_091" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_092" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_093" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_094" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_095" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_096" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_097" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_098" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_099" android:duration="33"/>
+    <item android:drawable="@drawable/floatball_100" android:duration="33"/>
+
+
+
+</animation-list>

@@ -36,6 +36,7 @@ import android.widget.ImageView;
 
 import com.huxq17.floatball.libarary.FloatBallManager;
 import com.huxq17.floatball.libarary.FloatBallUtil;
+import com.huxq17.floatball.libarary.utils.Constants;
 import com.huxq17.floatball.libarary.utils.LogUtils;
 
 import java.lang.reflect.Field;
@@ -112,7 +113,7 @@ public class FloatMenu extends FrameLayout {
     public void attachToWindow(WindowManager windowManager) {
         if (!isAdded) {
             mBallSize = floatBallManager.getBallSize();
-            mLayoutParams.x = floatBallManager.floatballX;
+            mLayoutParams.x = floatBallManager.floatballX+200;
             mLayoutParams.y = floatBallManager.floatballY - mSize / 2;
             mPosition = computeMenuLayout(mLayoutParams);
             refreshPathMenu(mPosition);
@@ -135,6 +136,10 @@ public class FloatMenu extends FrameLayout {
         }
     }
 
+    /**
+     * 添加菜单布局
+     * @param context
+     */
     private void addMenuLayout(Context context) {
         mMenuLayout = new MenuLayout(context);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(mSize, mSize);
@@ -142,6 +147,10 @@ public class FloatMenu extends FrameLayout {
         mMenuLayout.setVisibility(INVISIBLE);
     }
 
+    /**
+     * 添加悬浮球
+     * @param context
+     */
     private void addControllLayout(Context context) {
         mIconView = new ImageView(context);
         LayoutParams sublayoutParams = new LayoutParams(mBallSize, mBallSize);
@@ -307,12 +316,12 @@ public class FloatMenu extends FrameLayout {
         final int floatballCenterY = floatBallManager.floatballY + halfBallSize;
         final int statusBarHeight = floatBallManager.getStatusBarHeight();
 
-        int wmX = floatBallManager.floatballX;
+        int wmX = floatBallManager.floatballX+ Constants.CLICK_MOVE_DISTANCE_X;
         int wmY = floatballCenterY;
 
         if (wmX <= screenWidth / 3) //左边  竖区域
         {
-            wmX = 0;
+            wmX = 0+ Constants.CLICK_MOVE_DISTANCE_X;
             if (wmY <= mSize / 2) {
                 position = FloatMenu.LEFT_TOP;//左上
                 wmY = floatballCenterY - halfBallSize;
@@ -325,7 +334,8 @@ public class FloatMenu extends FrameLayout {
             }
         } else if (wmX >= screenWidth * 2 / 3)//右边竖区域
         {
-            wmX = screenWidth - mSize;
+//            wmX = screenWidth - mSize;
+            wmX = floatBallManager.floatballX- Constants.CLICK_MOVE_DISTANCE_X;
             if (wmY <= mSize / 2) {
                 position = FloatMenu.RIGHT_TOP;//右上
                 wmY = floatballCenterY - halfBallSize;

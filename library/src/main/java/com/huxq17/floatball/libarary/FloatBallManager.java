@@ -11,7 +11,8 @@ import android.view.WindowManager;
 import com.huxq17.floatball.libarary.floatball.FloatBall;
 import com.huxq17.floatball.libarary.floatball.FloatBallCfg;
 import com.huxq17.floatball.libarary.floatball.StatusBarView;
-import com.huxq17.floatball.libarary.menu.FloatMenu;
+import com.huxq17.floatball.libarary.menu.FloatAnimationLayout;
+import com.huxq17.floatball.libarary.menu.FloatMenu2;
 import com.huxq17.floatball.libarary.menu.FloatMenuCfg;
 import com.huxq17.floatball.libarary.menu.MenuItem;
 
@@ -26,10 +27,13 @@ public class FloatBallManager {
     private OnFloatBallClickListener mFloatballClickListener;
     private WindowManager mWindowManager;
     private Context mContext;
-    private FloatBall floatBall;
-    private FloatMenu floatMenu;
-    private StatusBarView statusBarView;
+    private FloatBall mFloatball;
+    private FloatMenu2 mFloatMenu;
+    private FloatAnimationLayout mFloatAnimationLayout;
+    private StatusBarView mStatusBarView;
     public int floatballX, floatballY;
+    public int mAnimationLayoutX;
+    public int mAnimationLayoutY;
     private boolean isShowing = false;
     private List<MenuItem> menuItems = new ArrayList<>();
     private Activity mActivity;
@@ -43,9 +47,10 @@ public class FloatBallManager {
         FloatBallUtil.inSingleActivity = false;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         computeScreenSize();
-        floatBall = new FloatBall(mContext, this, ballCfg);
-        floatMenu = new FloatMenu(mContext, this, menuCfg);
-        statusBarView = new StatusBarView(mContext, this);
+        mFloatball = new FloatBall(mContext, this, ballCfg);
+        mFloatMenu = new FloatMenu2(mContext, this, menuCfg);
+        mFloatAnimationLayout = new FloatAnimationLayout(mContext, this);
+        mStatusBarView = new StatusBarView(mContext, this);
     }
 
     public FloatBallManager(Activity activity, FloatBallCfg ballCfg) {
@@ -57,68 +62,32 @@ public class FloatBallManager {
         FloatBallUtil.inSingleActivity = true;
         mWindowManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
         computeScreenSize();
-        floatBall = new FloatBall(mActivity, this, ballCfg);
-        floatMenu = new FloatMenu(mActivity, this, menuCfg);
-        statusBarView = new StatusBarView(mActivity, this);
+        mFloatball = new FloatBall(mActivity, this, ballCfg);
+        mFloatMenu = new FloatMenu2(mActivity, this, menuCfg);
+        mFloatAnimationLayout = new FloatAnimationLayout(mContext, this);
+        mStatusBarView = new StatusBarView(mActivity, this);
     }
 
-    public void buildMenu() {
-        inflateMenuItem();
-    }
 
-    /**
-     * 添加一个菜单条目
-     *
-     * @param item
-     */
-    public FloatBallManager addMenuItem(MenuItem item) {
-        menuItems.add(item);
-        return this;
-    }
 
-    public int getMenuItemSize() {
-        return menuItems != null ? menuItems.size() : 0;
-    }
-
-    /**
-     * 设置菜单
-     *
-     * @param items
-     */
-    public FloatBallManager setMenu(List<MenuItem> items) {
-        menuItems = items;
-        return this;
-    }
-
-    private void inflateMenuItem() {
-        floatMenu.removeAllItemViews();
-        for (MenuItem item : menuItems) {
-            floatMenu.addItem(item);
-        }
-    }
 
     public int getBallSize() {
-        return floatBall.getSize();
+        return mFloatball.getSize();
     }
 
     public void computeScreenSize() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            Point point = new Point();
-            mWindowManager.getDefaultDisplay().getSize(point);
-            mScreenWidth = point.x;
-            mScreenHeight = point.y;
-        } else {
-            mScreenWidth = mWindowManager.getDefaultDisplay().getWidth();
-            mScreenHeight = mWindowManager.getDefaultDisplay().getHeight();
-        }
+        Point point = new Point();
+        mWindowManager.getDefaultDisplay().getSize(point);
+        mScreenWidth = point.x;
+        mScreenHeight = point.y;
     }
 
     public int getStatusBarHeight() {
-        return statusBarView.getStatusBarHeight();
+        return mStatusBarView.getStatusBarHeight();
     }
 
     public void onStatusBarHeightChange() {
-        floatBall.onLayoutChange();
+        mFloatball.onLayoutChange();
     }
 
     public void show() {
@@ -133,38 +102,61 @@ public class FloatBallManager {
         }
         if (isShowing) return;
         isShowing = true;
-        floatBall.setVisibility(View.VISIBLE);
-        statusBarView.attachToWindow(mWindowManager);
-        floatBall.attachToWindow(mWindowManager);
-        floatMenu.detachFromWindow(mWindowManager);
+        mFloatball.setVisibility(View.VISIBLE);
+        mStatusBarView.attachToWindow(mWindowManager);
+        mFloatball.attachToWindow(mWindowManager);
+//        mFloatMenu.detachFromWindow(mWindowManager);
+        mFloatAnimationLayout.detachFromWindow(mWindowManager);
     }
 
     public void closeMenu() {
-        floatMenu.closeMenu();
+//        mFloatMenu.closeMenu();
+    }
+
+    public void showAnimation(boolean expand) {
+        if (expand){
+            mFloatball.setVisibility(View.GONE);
+        }else {
+            mFloatMenu.detachFromWindow(mWindowManager);
+        }
+        mFloatAnimationLayout.attachToWindow(mWindowManager,expand);
+    }
+
+    public void attachFloatMenu(int position){
+        mFloatMenu.attachToWindow(mWindowManager,position);
     }
 
     public void reset() {
-        floatBall.setVisibility(View.VISIBLE);
-        floatBall.postSleepRunnable();
-        floatMenu.detachFromWindow(mWindowManager);
+        mFloatball.setVisibility(View.VISIBLE);
+        mFloatball.postSleepRunnable();
+        mFloatball.moveToLastPostion();
+        mFloatMenu.detachFromWindow(mWindowManager);
     }
 
     public void onFloatBallClick() {
-        if (menuItems != null && menuItems.size() > 0) {
-            floatMenu.attachToWindow(mWindowManager);
-        } else {
-            if (mFloatballClickListener != null) {
-                mFloatballClickListener.onFloatBallClick();
-            }
+
+        showAnimation(true);
+        if (mFloatballClickListener != null) {
+            mFloatballClickListener.onFloatBallClick();
         }
+    }
+
+    public void onFloatAnimationEnd(boolean expand, int position){
+        if (expand){
+            attachFloatMenu(position);
+        }else {
+            mFloatball.setVisibility(View.VISIBLE);
+        }
+        mFloatAnimationLayout.detachFromWindow(mWindowManager);
     }
 
     public void hide() {
         if (!isShowing) return;
         isShowing = false;
-        floatBall.detachFromWindow(mWindowManager);
-        floatMenu.detachFromWindow(mWindowManager);
-        statusBarView.detachFromWindow(mWindowManager);
+        mFloatball.detachFromWindow(mWindowManager);
+        mFloatMenu.detachFromWindow(mWindowManager);
+        mFloatAnimationLayout.detachFromWindow(mWindowManager);
+        mStatusBarView.detachFromWindow(mWindowManager);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
