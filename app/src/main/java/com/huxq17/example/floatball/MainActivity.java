@@ -72,7 +72,12 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
-
+        findViewById(R.id.btn).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        },2000);
         //6 如果想做成应用内悬浮球，可以添加以下代码。
 //        getApplication().registerActivityLifecycleCallbacks(mActivityLifeCycleListener);
     }
@@ -128,7 +133,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mFloatballManager.hide();
+//        mFloatballManager.hide();
     }
 
     private boolean isfull = false;

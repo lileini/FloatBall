@@ -3,6 +3,7 @@ package com.huxq17.floatball.libarary.menu;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -25,11 +26,22 @@ public class FloatAnimationLayout extends View {
     private boolean isMoving = false;
     private int position = FloatMenu.LEFT_TOP;
     private boolean isAdded;
-    private FloatBallManager mFloatBallManager;
-    private WindowManager.LayoutParams mLayoutParams;
-    private int mSize;
+//    private FloatBallManager mFloatBallManager;
+    private OnLayoutAnimationListener mListener;
 
-    public int computeMenuLayout(WindowManager.LayoutParams layoutParams) {
+    public FloatAnimationLayout(Context context) {
+        this(context,null);
+    }
+
+    public FloatAnimationLayout(Context context, AttributeSet attrs) {
+        this(context, attrs,0);
+    }
+
+    public FloatAnimationLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        setBackgroundResource(R.drawable.floatball_000);
+    }
+    /*public int computeMenuLayout(WindowManager.LayoutParams layoutParams) {
         int position = FloatMenu2.RIGHT_CENTER;
         final int halfBallSize = Constants.FLOAT_BALL_W / 2;
         final int screenWidth = mFloatBallManager.mScreenWidth;
@@ -71,30 +83,25 @@ public class FloatAnimationLayout extends View {
         layoutParams.x = wmX;
         layoutParams.y = wmY;
         return position;
-    }
+    }*/
 
 
-    public FloatAnimationLayout(Context context, final FloatBallManager floatBallManager) {
+    /*public FloatAnimationLayout(Context context) {
         super(context);
         mSize = Constants.FLOAT_LAYOUT_H;
         init(context);
         setBackgroundResource(R.drawable.floatball_000);
-        mFloatBallManager = floatBallManager;
-    }
+//        mFloatBallManager = floatBallManager;
+    }*/
 
-    private void init(Context context) {
-        mLayoutParams = FloatBallUtil.getLayoutParams(context, false);
-        mLayoutParams.width = Constants.FLOAT_LAYOUT_W;
-        mLayoutParams.height = Constants.FLOAT_LAYOUT_H;
-    }
 
 
     /**
      * 开始动画
      *
-     * @param windowManager
+     * @param
      */
-    public void attachToWindow(final WindowManager windowManager,final boolean expanded) {
+    /*public void attachToWindow(final WindowManager windowManager,final boolean expanded) {
         Log.d(TAG, "attachToWindow: ");
         if (!isAdded) {
             final int position = computeMenuLayout(mLayoutParams);
@@ -152,6 +159,70 @@ public class FloatAnimationLayout extends View {
             });
             frameAnimation.play();
         }
+    }*/
+
+    public void setOnLayoutAnimationLinstener(OnLayoutAnimationListener listener){
+        mListener = listener;
+    }
+
+    public void showLayoutAnimation(final int position, final boolean expanded){
+        int[] frameRess = null;
+        switch (position) {
+            case FloatMenu.LEFT_TOP://左上
+
+                break;
+            case FloatMenu.LEFT_CENTER://左中
+                break;
+            case FloatMenu.LEFT_BOTTOM://左下
+                break;
+            case FloatMenu.CENTER_TOP://上中
+                break;
+            case FloatMenu.CENTER_BOTTOM://下中
+                break;
+            case FloatMenu.RIGHT_TOP://右上
+                break;
+            case FloatMenu.RIGHT_CENTER://右中
+                if (expanded) {
+                    frameRess = getRes(R.array.right_center_expend);
+                }else {
+                    frameRess = getRes(R.array.right_center_right_pack_up);
+                }
+                break;
+            case FloatMenu.RIGHT_BOTTOM://右下
+                break;
+
+            case FloatMenu.CENTER:
+                break;
+        }
+
+
+        FrameAnimation frameAnimation = new FrameAnimation(this, frameRess, 33, false);
+        frameAnimation.setAnimationListener(new FrameAnimation.AnimationListener() {
+            @Override
+            public void onAnimationStart() {
+                Log.d(TAG, "onAnimationStart: ");
+                setVisibility(VISIBLE);
+                if (mListener != null){
+                    mListener.onAnimationStart(position,expanded);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd() {
+                Log.d(TAG, "onAnimationEnd: ");
+                setVisibility(GONE);
+                if (mListener != null){
+                    mListener.onAnimationEnd(position,expanded);
+                }
+//                mFloatBallManager.onFloatAnimationEnd(expanded,position);
+            }
+
+            @Override
+            public void onAnimationRepeat() {
+                Log.d(TAG, "onAnimationRepeat: ");
+            }
+        });
+        frameAnimation.play();
     }
 
     private int[] getRes(int array) {
@@ -181,8 +252,8 @@ public class FloatAnimationLayout extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mFloatBallManager.mAnimationLayoutX = mLayoutParams.x;
-        mFloatBallManager.mAnimationLayoutY = mLayoutParams.y;
+//        mFloatBallManager.mAnimationLayoutX = mLayoutParams.x;
+//        mFloatBallManager.mAnimationLayoutY = mLayoutParams.y;
     }
 
 
@@ -202,5 +273,10 @@ public class FloatAnimationLayout extends View {
 
     public void setExpand(boolean expand) {
         mExpanded = expand;
+    }
+
+    public interface OnLayoutAnimationListener{
+        void onAnimationStart(int position,boolean expanded);
+        void onAnimationEnd(int position,boolean expanded);
     }
 }

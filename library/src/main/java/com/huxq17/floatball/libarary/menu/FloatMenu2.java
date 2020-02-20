@@ -18,27 +18,24 @@ package com.huxq17.floatball.libarary.menu;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.Build;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import com.huxq17.floatball.libarary.FloatBallManager;
 import com.huxq17.floatball.libarary.FloatBallUtil;
 import com.huxq17.floatball.libarary.R;
 import com.huxq17.floatball.libarary.utils.Constants;
+import com.huxq17.floatball.libarary.view.FrameAnimation;
 
-public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
-    private final String TAG  = getClass().getSimpleName();
-//    private MenuLayout mMenuLayout;
-
-
+public class FloatMenu2 extends FrameLayout implements View.OnClickListener, FloatAnimationLayout.OnLayoutAnimationListener {
+    private final String TAG = getClass().getSimpleName();
+    //    private MenuLayout mMenuLayout;
+    private int mPosition = FloatMenu.RIGHT_CENTER;
+    private int mSize = Constants.FLOAT_LAYOUT_H;
     private FloatBallManager mFloatBallManager;
     private WindowManager.LayoutParams mLayoutParams;
     private boolean isAdded = false;
@@ -47,18 +44,19 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
     private View mNavigation;
     private View mPhone;
     private View mRadio;
+    private boolean mExpanded = false;
+    private FloatAnimationLayout mFloatAnimationLayout;
 
     public FloatMenu2(Context context, final FloatBallManager floatBallManager, FloatMenuCfg config) {
         super(context);
         this.mFloatBallManager = floatBallManager;
-        inflate(context, R.layout.layout_float_menu,this);
+        inflate(context, R.layout.layout_float_menu, this);
         init(context);
     }
 
     private void initLayoutParams(Context context) {
-        mLayoutParams = FloatBallUtil.getLayoutParams(context, false);
+        mLayoutParams = FloatBallUtil.getLayoutParams(context, true);
     }
-
 
 
     @Override
@@ -85,7 +83,9 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
                /* if (mMenuLayout.isExpanded()) {
                     toggle(mDuration);
                 }*/
-                mFloatBallManager.showAnimation(false);
+                if (mExpanded) {
+                    mFloatBallManager.showAnimation(false);
+                }
                 break;
         }
         return super.onTouchEvent(event);
@@ -95,8 +95,7 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        if (R.id.music == id){
-
+        if (R.id.music == id) {
             mFloatBallManager.showAnimation(false);
         }
         /*switch (view.getId()){
@@ -113,10 +112,71 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
         }*/
     }
 
-    public void attachToWindow(WindowManager windowManager,int position) {
+    public void showLayoutAnimation(final WindowManager windowManager, final boolean expanded) {
+        Log.d(TAG, "showLayoutAnimation: expanded=" + expanded);
+
+        if (expanded) {
+            mPosition = computeMenuLayout(mLayoutParams);
+            windowManager.updateViewLayout(this, mLayoutParams);
+        } else {
+            //展开动画还未完成，点击不能执行收起动画
+            mExpanded = expanded;
+        }
+        mFloatAnimationLayout.showLayoutAnimation(mPosition, expanded);
+    }
+
+
+    public int computeMenuLayout(WindowManager.LayoutParams layoutParams) {
+        int position = FloatMenu2.RIGHT_CENTER;
+        final int halfBallSize = Constants.FLOAT_BALL_W / 2;
+        final int screenWidth = mFloatBallManager.mScreenWidth;
+        final int screenHeight = mFloatBallManager.mScreenHeight;
+        final int floatballCenterY = mFloatBallManager.floatballY + halfBallSize;
+        final int statusBarHeight = mFloatBallManager.getStatusBarHeight();
+
+        int wmX = mFloatBallManager.floatballX + Constants.CLICK_MOVE_DISTANCE_X;
+        int wmY = floatballCenterY;
+
+        if (wmX <= screenWidth / 3) //左边  竖区域
+        {
+            wmX = 0 + Constants.CLICK_MOVE_DISTANCE_X;
+            if (wmY <= mSize / 2) {
+                position = FloatMenu2.LEFT_TOP;//左上
+                wmY = floatballCenterY - halfBallSize;
+            } else if (wmY > screenHeight - statusBarHeight - mSize / 2) {
+                position = FloatMenu2.LEFT_BOTTOM;//左下
+                wmY = floatballCenterY - mSize + halfBallSize;
+            } else {
+                position = FloatMenu2.LEFT_CENTER;//左中
+                wmY = floatballCenterY - mSize / 2;
+            }
+        } else if (wmX >= screenWidth * 2 / 3)//右边竖区域
+        {
+//            wmX = screenWidth - mSize;
+            wmX = mFloatBallManager.floatballX - Constants.CLICK_MOVE_DISTANCE_X;
+            if (wmY <= mSize / 2) {
+                position = FloatMenu2.RIGHT_TOP;//右上
+                wmY = floatballCenterY - halfBallSize;
+            } else if (wmY > screenHeight - statusBarHeight - mSize / 2) {
+                position = FloatMenu2.RIGHT_BOTTOM;//右下
+                wmY = floatballCenterY - mSize + halfBallSize;
+            } else {
+                position = FloatMenu2.RIGHT_CENTER;//右中
+                wmY = mFloatBallManager.floatballY - 184 + Constants.FLOAT_BALL_H / 2;
+                wmX = mFloatBallManager.floatballX - Constants.FLOAT_LAYOUT_W + (Constants.FLOAT_BALL_W - Constants.FLOAT_SHADOW_WIDTH);
+            }
+        }
+        layoutParams.x = wmX;
+        layoutParams.y = wmY;
+        return position;
+    }
+
+    public void attachToWindow(WindowManager windowManager) {
         if (!isAdded) {
-            mLayoutParams.x = mFloatBallManager.mAnimationLayoutX;
-            mLayoutParams.y = mFloatBallManager.mAnimationLayoutY;
+            Log.d(TAG, "attachToWindow: ");
+            setVisibility(GONE);
+            mPosition = computeMenuLayout(mLayoutParams);
+            Log.d(TAG, "attachToWindow: mPosition = " + mPosition);
             windowManager.addView(this, mLayoutParams);
             isAdded = true;
         }
@@ -124,6 +184,8 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
 
     public void detachFromWindow(WindowManager windowManager) {
         if (isAdded) {
+            Log.d(TAG, "detachFromWindow: ");
+            Log.d(TAG, Log.getStackTraceString(new Exception()));
 //            toggle(0);
             if (getContext() instanceof Activity) {
                 windowManager.removeViewImmediate(this);
@@ -131,6 +193,14 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
                 windowManager.removeView(this);
             }
             isAdded = false;
+        }
+    }
+
+    public void updateLayout(WindowManager windowManager) {
+        if (isAdded) {
+            Log.d(TAG, "updateLayout: ");
+            mPosition = computeMenuLayout(mLayoutParams);
+            windowManager.updateViewLayout(this, mLayoutParams);
         }
     }
 
@@ -159,11 +229,13 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
         mNavigation = findViewById(R.id.navigation);
         mPhone = findViewById(R.id.phone);
         mRadio = findViewById(R.id.radio);
+        mFloatAnimationLayout = findViewById(R.id.float_animation_layout);
 
         mMusic.setOnClickListener(this);
         mNavigation.setOnClickListener(this);
         mPhone.setOnClickListener(this);
         mRadio.setOnClickListener(this);
+        mFloatAnimationLayout.setOnLayoutAnimationLinstener(this);
     }
 
 
@@ -182,4 +254,28 @@ public class FloatMenu2 extends FrameLayout implements View.OnClickListener {
     public static final int CENTER_BOTTOM = 8;
     public static final int RIGHT_BOTTOM = 9;
 
+    @Override
+    public void onAnimationStart(int position, boolean expanded) {
+        setVisibility(VISIBLE);
+        setItemsVisible(false);
+    }
+
+    @Override
+    public void onAnimationEnd(int position, boolean expanded) {
+        if (expanded) {//展开
+            setItemsVisible(true);
+            mExpanded = expanded;
+            //因为开始展开动画可能未完成
+        } else {//收起
+            setVisibility(GONE);
+        }
+        mFloatBallManager.onFloatAnimationEnd(expanded, position);
+    }
+
+    private void setItemsVisible(boolean visible) {
+        mMusic.setVisibility(visible ? VISIBLE : GONE);
+        mNavigation.setVisibility(visible ? VISIBLE : GONE);
+        mPhone.setVisibility(visible ? VISIBLE : GONE);
+        mRadio.setVisibility(visible ? VISIBLE : GONE);
+    }
 }
