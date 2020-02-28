@@ -47,7 +47,9 @@ public class ScrollRunner implements Runnable {
 
     @Override
     public void run() {
+
         if (mScroller.computeScrollOffset()) {
+            Log.d(TAG, "run: lastX= "+lastX+",lastY="+lastY);
             final int currentX = mScroller.getCurrX();
             final int currentY = mScroller.getCurrY();
             mCarrier.onMove(lastX, lastY, currentX, currentY);

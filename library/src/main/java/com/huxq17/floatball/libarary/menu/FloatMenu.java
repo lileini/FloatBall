@@ -190,9 +190,11 @@ public class FloatMenu extends FrameLayout {
     }
 
     private void toggle(final int duration) {
+        Log.d(TAG, "toggle: ");
         //duration==0 indicate that close the menu, so if it has closed, do nothing.
         if (!mMenuLayout.isExpanded() && duration <= 0) return;
         mMenuLayout.setVisibility(VISIBLE);
+        Log.d(TAG, "toggle: getWidth() ="+getWidth());
         if (getWidth() == 0) {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
