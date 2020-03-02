@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -20,6 +21,7 @@ import java.util.List;
 
 
 public class FloatBallManager {
+    private static final String TAG = "FloatBallManager";
     public int mScreenWidth, mScreenHeight;
 
     private IFloatBallPermission mPermission;
@@ -122,6 +124,7 @@ public class FloatBallManager {
     }
 
     public void show() {
+        Log.d(TAG, "show: ");
         if (mActivity == null) {
             if (mPermission == null) {
                 return;
@@ -140,10 +143,12 @@ public class FloatBallManager {
     }
 
     public void closeMenu() {
+        Log.d(TAG, "closeMenu: ");
         floatMenu.closeMenu();
     }
 
     public void reset() {
+        Log.d(TAG, "reset: ");
         floatBall.setVisibility(View.VISIBLE);
         floatBall.postSleepRunnable();
         floatMenu.detachFromWindow(mWindowManager);
@@ -157,6 +162,9 @@ public class FloatBallManager {
                 mFloatballClickListener.onFloatBallClick();
             }
         }
+    }
+    public void hideFloatBall(){
+        floatBall.setVisibility(View.GONE);
     }
 
     public void hide() {

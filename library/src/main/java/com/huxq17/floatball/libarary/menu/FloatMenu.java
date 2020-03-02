@@ -16,6 +16,8 @@
 
 package com.huxq17.floatball.libarary.menu;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +38,7 @@ import android.widget.ImageView;
 
 import com.huxq17.floatball.libarary.FloatBallManager;
 import com.huxq17.floatball.libarary.FloatBallUtil;
+import com.huxq17.floatball.libarary.R;
 import com.huxq17.floatball.libarary.utils.LogUtils;
 
 import java.lang.reflect.Field;
@@ -57,6 +60,7 @@ public class FloatMenu extends FrameLayout {
     private int mBallSize;
     private FloatMenuCfg mConfig;
     private boolean mListenBackEvent = true;
+    private WindowManager mWindowManager;
 
     public FloatMenu(Context context, final FloatBallManager floatBallManager, FloatMenuCfg config) {
         super(context);
@@ -111,6 +115,8 @@ public class FloatMenu extends FrameLayout {
 
     public void attachToWindow(WindowManager windowManager) {
         if (!isAdded) {
+            mWindowManager = windowManager;
+            Log.d(TAG, "attachToWindow: ");
             mBallSize = floatBallManager.getBallSize();
             mLayoutParams.x = floatBallManager.floatballX;
             mLayoutParams.y = floatBallManager.floatballY - mSize / 2;
@@ -122,8 +128,10 @@ public class FloatMenu extends FrameLayout {
         }
     }
 
+
     public void detachFromWindow(WindowManager windowManager) {
         if (isAdded) {
+            Log.d(TAG, "detachFromWindow: ");
             toggle(0);
             mMenuLayout.setVisibility(GONE);
             if (getContext() instanceof Activity) {
@@ -135,6 +143,10 @@ public class FloatMenu extends FrameLayout {
         }
     }
 
+    /**
+     * 添加菜单布局
+     * @param context
+     */
     private void addMenuLayout(Context context) {
         mMenuLayout = new MenuLayout(context);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(mSize, mSize);
@@ -142,9 +154,18 @@ public class FloatMenu extends FrameLayout {
         mMenuLayout.setVisibility(INVISIBLE);
     }
 
+    /**
+     * 添加控制按钮
+     * @param context
+     */
     private void addControllLayout(Context context) {
         mIconView = new ImageView(context);
+
+        Log.d(TAG, "addControllLayout: mBallSize=" + mBallSize);
+        mBallSize = 116;
+        mIconView.setImageResource(R.drawable.ic_float_ball);
         LayoutParams sublayoutParams = new LayoutParams(mBallSize, mBallSize);
+        sublayoutParams.gravity = Gravity.CENTER;
         addView(mIconView, sublayoutParams);
     }
 
@@ -152,6 +173,7 @@ public class FloatMenu extends FrameLayout {
         initLayoutParams(context);
         mLayoutParams.height = mSize;
         mLayoutParams.width = mSize;
+        Log.d(TAG, "init: mSize="+mSize);
         addMenuLayout(context);
         addControllLayout(context);
         mIconView.setOnClickListener(new OnClickListener() {
@@ -185,12 +207,18 @@ public class FloatMenu extends FrameLayout {
     }
 
     public void remove() {
-        floatBallManager.reset();
-        mMenuLayout.setExpand(false);
+//        floatBallManager.reset();
+//        mMenuLayout.setExpand(false);
+        mIconView.setVisibility(VISIBLE);
+        showExpendAnimation(false,mDuration);
     }
 
+    /**
+     * 开始展开动画
+     * @param duration
+     */
     private void toggle(final int duration) {
-        Log.d(TAG, "toggle: ");
+        Log.d(TAG, "toggle: duration= "+duration);
         //duration==0 indicate that close the menu, so if it has closed, do nothing.
         if (!mMenuLayout.isExpanded() && duration <= 0) return;
         mMenuLayout.setVisibility(VISIBLE);
@@ -199,12 +227,114 @@ public class FloatMenu extends FrameLayout {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    mMenuLayout.switchState(mPosition, duration);
+                    floatBallManager.hideFloatBall();
+                    Log.d(TAG, "onAnimationUpdate: getLeft() ="+mLayoutParams.x);
+                    if (!mMenuLayout.isExpanded()){
+                        showExpendAnimation(true,duration);
+                    }else {
+//                        showExpendAnimation(false,duration);
+                        mMenuLayout.switchState(mPosition, duration);
+                    }
+
+//                    mMenuLayout.switchState(mPosition, duration);
                     removeViewTreeObserver(this);
                 }
             });
         } else {
-            mMenuLayout.switchState(mPosition, duration);
+//            mMenuLayout.switchState(mPosition, duration);
+
+            floatBallManager.hideFloatBall();
+            Log.d(TAG, "onAnimationUpdate: getLeft() ="+mLayoutParams.x);
+            if (!mMenuLayout.isExpanded()){
+                showExpendAnimation(true,duration);
+            }else {
+//                showExpendAnimation(false,duration);
+                mMenuLayout.switchState(mPosition, duration);
+            }
+        }
+    }
+    private void showExpendAnimation(boolean expend,final int duration){
+        final int screenWidth = floatBallManager.mScreenWidth;
+        if (expend){
+            final ValueAnimator animator = ValueAnimator.ofInt(mLayoutParams.x,screenWidth - mSize);
+            animator.setDuration(mDuration);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    int x = (int) valueAnimator.getAnimatedValue();
+                    mLayoutParams.x = x;
+                    Log.d(TAG, "onAnimationUpdate: mLayoutParams.x ="+x);
+                    try {
+                        mWindowManager.updateViewLayout(FloatMenu.this,mLayoutParams);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    mIconView.setVisibility(GONE);
+                    mMenuLayout.switchState(mPosition, duration);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animator.start();
+        }else {
+            final ValueAnimator animator = ValueAnimator.ofInt(mLayoutParams.x,screenWidth - mSize/2-58);
+            animator.setDuration(mDuration);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    int x = (int) valueAnimator.getAnimatedValue();
+                    mLayoutParams.x = x;
+                    Log.d(TAG, "onAnimationUpdate: mLayoutParams.x ="+x);
+                    try {
+                        mWindowManager.updateViewLayout(FloatMenu.this,mLayoutParams);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+//                    mMenuLayout.switchState(mPosition, duration);
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    floatBallManager.reset();
+                    mMenuLayout.setExpand(false);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animator.start();
         }
     }
 
@@ -259,7 +389,8 @@ public class FloatMenu extends FrameLayout {
                 mMenuLayout.setArc(90, 180, position);
                 break;
             case RIGHT_CENTER://右中
-                iconLp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+                // TODO: 20-2-28 处理位置
+//                iconLp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
                 menuLp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
                 mMenuLayout.setArc(90, 270, position);
                 break;
@@ -327,7 +458,7 @@ public class FloatMenu extends FrameLayout {
             }
         } else if (wmX >= screenWidth * 2 / 3)//右边竖区域
         {
-            wmX = screenWidth - mSize;
+            wmX = screenWidth - mSize/2-58;
             if (wmY <= mSize / 2) {
                 position = FloatMenu.RIGHT_TOP;//右上
                 wmY = floatballCenterY - halfBallSize;

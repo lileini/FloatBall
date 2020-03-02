@@ -60,7 +60,8 @@ public class MenuLayout extends ViewGroup implements ICarrier {
                 centerY = height / 2 - getRadiusAndPadding();
                 break;
             case FloatMenu.RIGHT_CENTER://右中
-                centerX = width / 2 + getRadiusAndPadding();
+//                centerX = width / 2 + getRadiusAndPadding();
+                centerX = width / 2 ;
                 centerY = height / 2;
                 break;
             case FloatMenu.RIGHT_BOTTOM://右下
@@ -135,7 +136,8 @@ public class MenuLayout extends ViewGroup implements ICarrier {
     private int getLayoutSize() {
         mRadius = computeRadius(Math.abs(mToDegrees - mFromDegrees), getChildCount(),
                 mChildSize, mChildPadding, MIN_RADIUS);
-        int layoutPadding = 10;
+//        int layoutPadding = 10;
+        int layoutPadding = 0;
         return mRadius * 2 + mChildSize + mChildPadding + layoutPadding * 2;
     }
 
@@ -181,7 +183,8 @@ public class MenuLayout extends ViewGroup implements ICarrier {
                 degrees += perDegrees;
             }
         } else {
-            perDegrees = arcDegrees == 360 ? arcDegrees / (childCount) : arcDegrees / (childCount - 1);
+//            perDegrees = arcDegrees == 360 ? arcDegrees / (childCount) : arcDegrees / (childCount - 1);
+            perDegrees = 90;
         }
         for (int i = 0; i < childCount; i++) {
             int index = getChildDrawingOrder(childCount, i);
@@ -224,6 +227,8 @@ public class MenuLayout extends ViewGroup implements ICarrier {
     public void onDone() {
         isMoving = false;
         if (!mExpanded) {
+
+            setVisibility(GONE);
             FloatMenu floatMenu = (FloatMenu) getParent();
             floatMenu.remove();
         }
