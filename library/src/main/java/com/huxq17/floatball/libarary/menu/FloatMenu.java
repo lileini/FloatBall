@@ -20,11 +20,9 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.net.Uri;
+import android.graphics.Point;
 import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -39,13 +37,13 @@ import android.widget.ImageView;
 import com.huxq17.floatball.libarary.FloatBallManager;
 import com.huxq17.floatball.libarary.FloatBallUtil;
 import com.huxq17.floatball.libarary.R;
+import com.huxq17.floatball.libarary.runner.ICarrier;
+import com.huxq17.floatball.libarary.runner.ScrollRunner;
+import com.huxq17.floatball.libarary.utils.Constant;
 import com.huxq17.floatball.libarary.utils.LogUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-public class FloatMenu extends FrameLayout {
-    private final String TAG  = getClass().getSimpleName();
+public class FloatMenu extends FrameLayout implements ICarrier {
+    private final String TAG = getClass().getSimpleName();
     private MenuLayout mMenuLayout;
 
     private ImageView mIconView;
@@ -61,6 +59,9 @@ public class FloatMenu extends FrameLayout {
     private FloatMenuCfg mConfig;
     private boolean mListenBackEvent = true;
     private WindowManager mWindowManager;
+    private ScrollRunner mRunner;
+    private Point mLastPoint;
+    private boolean mExpended = false;
 
     public FloatMenu(Context context, final FloatBallManager floatBallManager, FloatMenuCfg config) {
         super(context);
@@ -71,12 +72,12 @@ public class FloatMenu extends FrameLayout {
         mSize = mConfig.mSize;
         init(context);
         mMenuLayout.setChildSize(mItemSize);
+
     }
 
     private void initLayoutParams(Context context) {
         mLayoutParams = FloatBallUtil.getLayoutParams(context, mListenBackEvent);
     }
-
 
 
     @SuppressWarnings("deprecation")
@@ -145,6 +146,7 @@ public class FloatMenu extends FrameLayout {
 
     /**
      * 添加菜单布局
+     *
      * @param context
      */
     private void addMenuLayout(Context context) {
@@ -156,6 +158,7 @@ public class FloatMenu extends FrameLayout {
 
     /**
      * 添加控制按钮
+     *
      * @param context
      */
     private void addControllLayout(Context context) {
@@ -173,7 +176,7 @@ public class FloatMenu extends FrameLayout {
         initLayoutParams(context);
         mLayoutParams.height = mSize;
         mLayoutParams.width = mSize;
-        Log.d(TAG, "init: mSize="+mSize);
+        Log.d(TAG, "init: mSize=" + mSize);
         addMenuLayout(context);
         addControllLayout(context);
         mIconView.setOnClickListener(new OnClickListener() {
@@ -198,6 +201,8 @@ public class FloatMenu extends FrameLayout {
             });
             setFocusableInTouchMode(true);
         }
+        mRunner = new ScrollRunner(this);
+        mLastPoint = new Point();
     }
 
     public void closeMenu() {
@@ -210,29 +215,30 @@ public class FloatMenu extends FrameLayout {
 //        floatBallManager.reset();
 //        mMenuLayout.setExpand(false);
         mIconView.setVisibility(VISIBLE);
-        showExpendAnimation(false,mDuration);
+        showTransitionAnimation(false, mDuration);
     }
 
     /**
      * 开始展开动画
+     *
      * @param duration
      */
     private void toggle(final int duration) {
-        Log.d(TAG, "toggle: duration= "+duration);
+        Log.d(TAG, "toggle: duration= " + duration);
         //duration==0 indicate that close the menu, so if it has closed, do nothing.
         if (!mMenuLayout.isExpanded() && duration <= 0) return;
         mMenuLayout.setVisibility(VISIBLE);
-        Log.d(TAG, "toggle: getWidth() ="+getWidth());
+        Log.d(TAG, "toggle: getWidth() =" + getWidth());
         if (getWidth() == 0) {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
                     floatBallManager.hideFloatBall();
-                    Log.d(TAG, "onAnimationUpdate: getLeft() ="+mLayoutParams.x);
-                    if (!mMenuLayout.isExpanded()){
-                        showExpendAnimation(true,duration);
-                    }else {
-//                        showExpendAnimation(false,duration);
+                    Log.d(TAG, "onAnimationUpdate: getLeft() =" + mLayoutParams.x);
+                    if (!mMenuLayout.isExpanded()) {
+                        showTransitionAnimation(true, duration);
+                    } else {
+//                        showTransitionAnimation(false,duration);
                         mMenuLayout.switchState(mPosition, duration);
                     }
 
@@ -244,16 +250,102 @@ public class FloatMenu extends FrameLayout {
 //            mMenuLayout.switchState(mPosition, duration);
 
             floatBallManager.hideFloatBall();
-            Log.d(TAG, "onAnimationUpdate: getLeft() ="+mLayoutParams.x);
-            if (!mMenuLayout.isExpanded()){
-                showExpendAnimation(true,duration);
-            }else {
-//                showExpendAnimation(false,duration);
+            Log.d(TAG, "onAnimationUpdate: getLeft() =" + mLayoutParams.x);
+            if (!mMenuLayout.isExpanded()) {
+                showTransitionAnimation(true, duration);
+            } else {
+//                showTransitionAnimation(false,duration);
                 mMenuLayout.switchState(mPosition, duration);
             }
         }
     }
-    private void showExpendAnimation(boolean expend,final int duration){
+
+    private void showTransitionAnimation(boolean expend, final int duration) {
+        final int screenWidth = floatBallManager.mScreenWidth;
+        final int screenHeight = floatBallManager.mScreenHeight;
+        Log.d(TAG, "showTransitionAnimation: expend= " + expend);
+        if (expend) {
+            mLastPoint.x = mLayoutParams.x;
+            mLastPoint.y = mLayoutParams.y;
+            int dx = 0;
+            int dy = 0;
+            switch (mPosition) {
+                case LEFT_TOP://左上
+                    dx = -mLayoutParams.x;
+                    dy = 0 - mLayoutParams.y;
+                    break;
+                case LEFT_CENTER://左中
+                    dx = -mLayoutParams.x;
+                    break;
+                case LEFT_BOTTOM://左下
+                    dx = -mLayoutParams.x;
+                    dy = screenHeight - floatBallManager.getStatusBarHeight() - mSize - mLayoutParams.y;
+                    break;
+                case RIGHT_TOP://右上
+                    dx = screenWidth - mSize - mLayoutParams.x;
+                    dy = 0 - mLayoutParams.y;
+                    break;
+                case RIGHT_CENTER://右中
+                    dx = screenWidth - mSize - mLayoutParams.x;
+                    break;
+                case RIGHT_BOTTOM://右下
+                    dx = screenWidth - mSize - mLayoutParams.x;
+                    dy = screenHeight - floatBallManager.getStatusBarHeight() - mSize - mLayoutParams.y;
+                    break;
+
+                case CENTER_TOP://上中
+                    break;
+                case CENTER_BOTTOM://下中
+                    break;
+
+//                case RIGHT_CENTER:
+//                    mRunner.start(mLayoutParams.x, mLayoutParams.y, screenWidth - mSize - mLayoutParams.x,
+//                            0, 250);
+//                    break;
+
+            }
+            Log.d(TAG, "showTransitionAnimation: mLayoutParams.x= " + mLayoutParams.x + ",mLayoutParams.y= " + mLayoutParams.y + ",dx= " + dx + ",dy=" + dy);
+            mRunner.start(mLayoutParams.x, mLayoutParams.y, dx,
+                    dy, 250);
+
+        } else {
+            int dx = mLastPoint.x - mLayoutParams.x;
+            int dy = mLastPoint.y - mLayoutParams.y;
+           /* switch (mPosition) {
+                case LEFT_TOP://左上
+                    break;
+                case LEFT_CENTER://左中
+                    break;
+                case LEFT_BOTTOM://左下
+                    break;
+                case RIGHT_TOP://右上
+                    dx = mLastPoint.x - mLayoutParams.x;
+                    dy =   mLastPoint.y -mLayoutParams.y;
+                    break;
+                case RIGHT_CENTER://右中
+                    dx = mLastPoint.x - mLayoutParams.x;
+                    break;
+                case RIGHT_BOTTOM://右下
+                    break;
+
+                case CENTER_TOP://上中
+                    break;
+                case CENTER_BOTTOM://下中
+                    break;
+
+//                case RIGHT_CENTER:
+//                    mRunner.start(mLayoutParams.x, mLayoutParams.y, screenWidth - mSize - mLayoutParams.x,
+//                            0, 250);
+//                    break;
+
+            }*/
+            mRunner.start(mLayoutParams.x, mLayoutParams.y, dx,
+                    dy, 250);
+
+        }
+    }
+
+    /*private void showTransitionAnimation(boolean expend, final int duration){
         final int screenWidth = floatBallManager.mScreenWidth;
         if (expend){
             final ValueAnimator animator = ValueAnimator.ofInt(mLayoutParams.x,screenWidth - mSize);
@@ -336,7 +428,7 @@ public class FloatMenu extends FrameLayout {
             });
             animator.start();
         }
-    }
+    }*/
 
     public boolean isMoving() {
         return mMenuLayout.isMoving();
@@ -366,27 +458,28 @@ public class FloatMenu extends FrameLayout {
     public void refreshPathMenu(int position) {
         LayoutParams menuLp = (LayoutParams) mMenuLayout.getLayoutParams();
         LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
-        LogUtils.d("refreshPathMenu position= "+position);
-        switch (position) {
+        LogUtils.d("refreshPathMenu position= " + position);
+        /*switch (position) {
             case LEFT_TOP://左上
-                iconLp.gravity = Gravity.LEFT | Gravity.TOP;
+//                iconLp.gravity = Gravity.LEFT | Gravity.TOP;
                 menuLp.gravity = Gravity.LEFT | Gravity.TOP;
                 mMenuLayout.setArc(0, 90, position);
                 break;
             case LEFT_CENTER://左中
-                iconLp.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+//                iconLp.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
                 menuLp.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
                 mMenuLayout.setArc(270, 270 + 180, position);
                 break;
             case LEFT_BOTTOM://左下
-                iconLp.gravity = Gravity.LEFT | Gravity.BOTTOM;
+//                iconLp.gravity = Gravity.LEFT | Gravity.BOTTOM;
                 menuLp.gravity = Gravity.LEFT | Gravity.BOTTOM;
                 mMenuLayout.setArc(270, 360, position);
                 break;
             case RIGHT_TOP://右上
-                iconLp.gravity = Gravity.RIGHT | Gravity.TOP;
+//                iconLp.gravity = Gravity.RIGHT | Gravity.TOP;
                 menuLp.gravity = Gravity.RIGHT | Gravity.TOP;
-                mMenuLayout.setArc(90, 180, position);
+//                mMenuLayout.setArc(90, 180, position);
+                mMenuLayout.setArc(90, 270, position);
                 break;
             case RIGHT_CENTER://右中
                 // TODO: 20-2-28 处理位置
@@ -395,27 +488,31 @@ public class FloatMenu extends FrameLayout {
                 mMenuLayout.setArc(90, 270, position);
                 break;
             case RIGHT_BOTTOM://右下
-                iconLp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+//                iconLp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
                 menuLp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
                 mMenuLayout.setArc(180, 270, position);
                 break;
 
             case CENTER_TOP://上中
-                iconLp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+//                iconLp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
                 menuLp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
                 mMenuLayout.setArc(0, 180, position);
                 break;
             case CENTER_BOTTOM://下中
-                iconLp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+//                iconLp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
                 menuLp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
                 mMenuLayout.setArc(180, 360, position);
                 break;
             case CENTER:
-                iconLp.gravity = Gravity.CENTER;
+//                iconLp.gravity = Gravity.CENTER;
                 menuLp.gravity = Gravity.CENTER;
                 mMenuLayout.setArc(0, 360, position);
                 break;
-        }
+        }*/
+        menuLp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+        mMenuLayout.setArc(90, 270, position);
+
+
         mIconView.setLayoutParams(iconLp);
         mMenuLayout.setLayoutParams(menuLp);
     }
@@ -445,26 +542,28 @@ public class FloatMenu extends FrameLayout {
 
         if (wmX <= screenWidth / 3) //左边  竖区域
         {
-            wmX = 0;
+            wmX =  Constant.FLOAT_BALL_W / 2 - mSize/2;
             if (wmY <= mSize / 2) {
                 position = FloatMenu.LEFT_TOP;//左上
-                wmY = floatballCenterY - halfBallSize;
+                wmY = floatballCenterY - mSize / 2;
             } else if (wmY > screenHeight - statusBarHeight - mSize / 2) {
                 position = FloatMenu.LEFT_BOTTOM;//左下
-                wmY = floatballCenterY - mSize + halfBallSize;
+                wmY = floatballCenterY - mSize / 2;
             } else {
                 position = FloatMenu.LEFT_CENTER;//左中
                 wmY = floatballCenterY - mSize / 2;
             }
         } else if (wmX >= screenWidth * 2 / 3)//右边竖区域
         {
-            wmX = screenWidth - mSize/2-58;
+            wmX = screenWidth - mSize / 2 - Constant.FLOAT_BALL_W / 2;
             if (wmY <= mSize / 2) {
                 position = FloatMenu.RIGHT_TOP;//右上
-                wmY = floatballCenterY - halfBallSize;
+//                wmY = floatballCenterY - halfBallSize;
+                wmY = floatballCenterY - mSize / 2;
             } else if (wmY > screenHeight - statusBarHeight - mSize / 2) {
                 position = FloatMenu.RIGHT_BOTTOM;//右下
-                wmY = floatballCenterY - mSize + halfBallSize;
+//                wmY = floatballCenterY - mSize + halfBallSize;
+                wmY = floatballCenterY - mSize / 2;
             } else {
                 position = FloatMenu.RIGHT_CENTER;//右中
                 wmY = floatballCenterY - mSize / 2;
@@ -484,4 +583,27 @@ public class FloatMenu extends FrameLayout {
     public static final int LEFT_BOTTOM = 7;
     public static final int CENTER_BOTTOM = 8;
     public static final int RIGHT_BOTTOM = 9;
+
+    @Override
+    public void onMove(int lastX, int lastY, int curX, int curY) {
+        Log.d(TAG, "onMove: lastX=" + lastX + ",lastY=" + lastY + ",curX=" + curX + ",curY=" + curY);
+        mLayoutParams.x = curX;
+        mLayoutParams.y = curY;
+        mWindowManager.updateViewLayout(FloatMenu.this, mLayoutParams);
+    }
+
+    @Override
+    public void onDone() {
+        Log.d(TAG, "onDone: mExpended = " + mExpended);
+        //没有展开，执行展开动画
+        if (mExpended) {
+            floatBallManager.reset();
+            mMenuLayout.setExpand(false);
+
+        } else {
+            mIconView.setVisibility(GONE);
+            mMenuLayout.switchState(mPosition, mDuration);
+        }
+        mExpended = !mExpended;
+    }
 }

@@ -316,10 +316,10 @@ public class FloatBall extends FrameLayout implements ICarrier {
         int destX;
         final int minVelocity = mVelocity.getMinVelocity();
         if (mLayoutParams.x < centerX) {
-            sleep = forceSleep || Math.abs(mVelocityX) > minVelocity && mVelocityX < 0 || mLayoutParams.x < 0;
+//            sleep = forceSleep || Math.abs(mVelocityX) > minVelocity && mVelocityX < 0 || mLayoutParams.x < 0;
             destX = sleep ? -halfWidth : 0;
         } else {
-            sleep = forceSleep || Math.abs(mVelocityX) > minVelocity && mVelocityX > 0 || mLayoutParams.x > screenWidth - width;
+//            sleep = forceSleep || Math.abs(mVelocityX) > minVelocity && mVelocityX > 0 || mLayoutParams.x > screenWidth - width;
             destX = sleep ? screenWidth - halfWidth : screenWidth - width;
         }
         if (sleep) {

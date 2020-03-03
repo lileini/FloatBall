@@ -24,7 +24,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
     private static int MIN_RADIUS;
     private int mRadius;// 中心菜单圆点到子菜单中心的距离
     private boolean mExpanded = false;
-    private boolean isMoving = false;
+    private boolean mMoving = false;
     private int position = FloatMenu.LEFT_TOP;
     private int centerX = 0;
     private int centerY = 0;
@@ -34,7 +34,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
         final int size = getLayoutSize();
         int width = size;
         int height = size;
-        switch (position) {
+        /*switch (position) {
             case FloatMenu.LEFT_TOP://左上
                 centerX = width / 2 - getRadiusAndPadding();
                 centerY = height / 2 - getRadiusAndPadding();
@@ -56,8 +56,8 @@ public class MenuLayout extends ViewGroup implements ICarrier {
                 centerY = height / 2 + getRadiusAndPadding();
                 break;
             case FloatMenu.RIGHT_TOP://右上
-                centerX = width / 2 + getRadiusAndPadding();
-                centerY = height / 2 - getRadiusAndPadding();
+//                centerX = width / 2 + getRadiusAndPadding();
+//                centerY = height / 2 - getRadiusAndPadding();
                 break;
             case FloatMenu.RIGHT_CENTER://右中
 //                centerX = width / 2 + getRadiusAndPadding();
@@ -73,7 +73,9 @@ public class MenuLayout extends ViewGroup implements ICarrier {
                 centerX = width / 2;
                 centerY = width / 2;
                 break;
-        }
+        }*/
+        centerX = width / 2 ;
+        centerY = height / 2;
         LogUtils.d("centerX= "+centerX+",centerY= "+centerY);
     }
 
@@ -146,7 +148,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
      */
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (isMoving) return;
+        if (mMoving) return;
         computeCenterXY(position);
         final int radius = 0;
         layoutItem(radius);
@@ -196,7 +198,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
 
     @Override
     public void requestLayout() {
-        if (!isMoving) {
+        if (!mMoving) {
             super.requestLayout();
         }
     }
@@ -207,7 +209,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
     public void switchState(int position, int duration) {
         this.position = position;
         mExpanded = !mExpanded;
-        isMoving = true;
+        mMoving = true;
         mRadius = computeRadius(Math.abs(mToDegrees - mFromDegrees), getChildCount(),
                 mChildSize, mChildPadding, MIN_RADIUS);
         final int start = mExpanded ? 0 : mRadius;
@@ -216,7 +218,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
     }
 
     public boolean isMoving() {
-        return isMoving;
+        return mMoving;
     }
 
     @Override
@@ -224,8 +226,9 @@ public class MenuLayout extends ViewGroup implements ICarrier {
         layoutItem(curX);
     }
 
+    @Override
     public void onDone() {
-        isMoving = false;
+        mMoving = false;
         if (!mExpanded) {
 
             setVisibility(GONE);
