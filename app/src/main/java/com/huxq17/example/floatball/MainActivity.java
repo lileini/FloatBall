@@ -210,10 +210,10 @@ public class MainActivity extends Activity {
                 mFloatballManager.closeMenu();
             }
         };
-        mFloatballManager.addMenuItem(navigationItem)
-                .addMenuItem(musicItem)
+        mFloatballManager.addMenuItem(radioItem)
                 .addMenuItem(phoneItem)
-                .addMenuItem(radioItem)
+                .addMenuItem(navigationItem)
+                .addMenuItem(musicItem)
                 .buildMenu();
 
 

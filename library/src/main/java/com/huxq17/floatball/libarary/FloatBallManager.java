@@ -28,12 +28,13 @@ public class FloatBallManager {
     private OnFloatBallClickListener mFloatballClickListener;
     private WindowManager mWindowManager;
     private Context mContext;
-    private FloatBall floatBall;
-    private FloatMenu floatMenu;
-    private StatusBarView statusBarView;
-    public int floatballX, floatballY;
-    private boolean isShowing = false;
-    private List<MenuItem> menuItems = new ArrayList<>();
+    private FloatBall mFloatBall;
+    private FloatMenu mFloatMenu;
+    private StatusBarView mStatusBarView;
+    public int mFloatballX;
+    public int mFloatballY;
+    private boolean mShowing = false;
+    private List<MenuItem> mMenuItems = new ArrayList<>();
     private Activity mActivity;
 
     public FloatBallManager(Context application, FloatBallCfg ballCfg) {
@@ -45,9 +46,9 @@ public class FloatBallManager {
         FloatBallUtil.inSingleActivity = false;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         computeScreenSize();
-        floatBall = new FloatBall(mContext, this, ballCfg);
-        floatMenu = new FloatMenu(mContext, this, menuCfg);
-        statusBarView = new StatusBarView(mContext, this);
+        mFloatBall = new FloatBall(mContext, this, ballCfg);
+        mFloatMenu = new FloatMenu(mContext, this, menuCfg);
+        mStatusBarView = new StatusBarView(mContext, this);
     }
 
     public FloatBallManager(Activity activity, FloatBallCfg ballCfg) {
@@ -59,9 +60,9 @@ public class FloatBallManager {
         FloatBallUtil.inSingleActivity = true;
         mWindowManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
         computeScreenSize();
-        floatBall = new FloatBall(mActivity, this, ballCfg);
-        floatMenu = new FloatMenu(mActivity, this, menuCfg);
-        statusBarView = new StatusBarView(mActivity, this);
+        mFloatBall = new FloatBall(mActivity, this, ballCfg);
+        mFloatMenu = new FloatMenu(mActivity, this, menuCfg);
+        mStatusBarView = new StatusBarView(mActivity, this);
     }
 
     public void buildMenu() {
@@ -74,12 +75,12 @@ public class FloatBallManager {
      * @param item
      */
     public FloatBallManager addMenuItem(MenuItem item) {
-        menuItems.add(item);
+        mMenuItems.add(item);
         return this;
     }
 
     public int getMenuItemSize() {
-        return menuItems != null ? menuItems.size() : 0;
+        return mMenuItems != null ? mMenuItems.size() : 0;
     }
 
     /**
@@ -88,19 +89,19 @@ public class FloatBallManager {
      * @param items
      */
     public FloatBallManager setMenu(List<MenuItem> items) {
-        menuItems = items;
+        mMenuItems = items;
         return this;
     }
 
     private void inflateMenuItem() {
-        floatMenu.removeAllItemViews();
-        for (MenuItem item : menuItems) {
-            floatMenu.addItem(item);
+        mFloatMenu.removeAllItemViews();
+        for (MenuItem item : mMenuItems) {
+            mFloatMenu.addItem(item);
         }
     }
 
     public int getBallSize() {
-        return floatBall.getSize();
+        return mFloatBall.getSize();
     }
 
     public void computeScreenSize() {
@@ -116,11 +117,11 @@ public class FloatBallManager {
     }
 
     public int getStatusBarHeight() {
-        return statusBarView.getStatusBarHeight();
+        return mStatusBarView.getStatusBarHeight();
     }
 
     public void onStatusBarHeightChange() {
-        floatBall.onLayoutChange();
+        mFloatBall.onLayoutChange();
     }
 
     public void show() {
@@ -134,29 +135,29 @@ public class FloatBallManager {
                 return;
             }
         }
-        if (isShowing) return;
-        isShowing = true;
-        floatBall.setVisibility(View.VISIBLE);
-        statusBarView.attachToWindow(mWindowManager);
-        floatBall.attachToWindow(mWindowManager);
-        floatMenu.detachFromWindow(mWindowManager);
+        if (mShowing) return;
+        mShowing = true;
+        mFloatBall.setVisibility(View.VISIBLE);
+        mStatusBarView.attachToWindow(mWindowManager);
+        mFloatBall.attachToWindow(mWindowManager);
+        mFloatMenu.detachFromWindow(mWindowManager);
     }
 
     public void closeMenu() {
         Log.d(TAG, "closeMenu: ");
-        floatMenu.closeMenu();
+        mFloatMenu.closeMenu();
     }
 
     public void reset() {
         Log.d(TAG, "reset: ");
-        floatBall.setVisibility(View.VISIBLE);
-        floatBall.postSleepRunnable();
-        floatMenu.detachFromWindow(mWindowManager);
+        mFloatBall.setVisibility(View.VISIBLE);
+        mFloatBall.postSleepRunnable();
+        mFloatMenu.detachFromWindow(mWindowManager);
     }
 
     public void onFloatBallClick() {
-        if (menuItems != null && menuItems.size() > 0) {
-            floatMenu.attachToWindow(mWindowManager);
+        if (mMenuItems != null && mMenuItems.size() > 0) {
+            mFloatMenu.attachToWindow(mWindowManager);
         } else {
             if (mFloatballClickListener != null) {
                 mFloatballClickListener.onFloatBallClick();
@@ -164,15 +165,15 @@ public class FloatBallManager {
         }
     }
     public void hideFloatBall(){
-        floatBall.setVisibility(View.GONE);
+        mFloatBall.setVisibility(View.GONE);
     }
 
     public void hide() {
-        if (!isShowing) return;
-        isShowing = false;
-        floatBall.detachFromWindow(mWindowManager);
-        floatMenu.detachFromWindow(mWindowManager);
-        statusBarView.detachFromWindow(mWindowManager);
+        if (!mShowing) return;
+        mShowing = false;
+        mFloatBall.detachFromWindow(mWindowManager);
+        mFloatMenu.detachFromWindow(mWindowManager);
+        mStatusBarView.detachFromWindow(mWindowManager);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
