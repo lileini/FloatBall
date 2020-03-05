@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/holo_green_dark"
-    tools:context="com.huxq17.example.floatball.MainActivity">
+    tools:context="com.chinatsp.example.floatball.MainActivity">
 
     <Button
         android:layout_width="wrap_content"
@@ -12,4 +12,28 @@
         android:onClick="showFloatBall"
         android:layout_centerInParent="true"
         android:text="显示悬浮球" />
+    <Button
+        android:id="@+id/btn_open"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="打开菜单" />
+    <Button
+        android:id="@+id/btn_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/btn_open"
+        android:text="关闭菜单" />
+    <Button
+        android:id="@+id/btn_choose_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/btn_close"
+        android:text="选中菜单选项" />
+    <EditText
+        android:id="@+id/et"
+        android:layout_width="300dp"
+        android:inputType="number"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>
