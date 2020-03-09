@@ -180,28 +180,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void addFloatMenuItem() {
-        MenuItem navigationItem = new MenuItem(getResources().getDrawable(R.drawable.ic_navigation)) {
+        MenuItem navigationItem = new MenuItem(getResources().getDrawable(R.drawable.selector_navigation)) {
             @Override
             public void action() {
                 toast("打开导航");
                 mFloatballManager.closeMenu();
             }
         };
-        MenuItem musicItem = new MenuItem(getResources().getDrawable(R.drawable.ic_music)) {
+        MenuItem musicItem = new MenuItem(getResources().getDrawable(R.drawable.selector_music)) {
             @Override
             public void action() {
                 toast("打开音乐");
                 mFloatballManager.closeMenu();
             }
         };
-        MenuItem phoneItem = new MenuItem(getResources().getDrawable(R.drawable.ic_phone)) {
+        MenuItem phoneItem = new MenuItem(getResources().getDrawable(R.drawable.selector_phone)) {
             @Override
             public void action() {
                 toast("打开电话");
                 mFloatballManager.closeMenu();
             }
         };
-        MenuItem radioItem = new MenuItem(getResources().getDrawable(R.drawable.ic_radio)) {
+        MenuItem radioItem = new MenuItem(getResources().getDrawable(R.drawable.selector_radio)) {
             @Override
             public void action() {
                 toast("打开收音机");
@@ -268,7 +268,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //1 初始化悬浮球配置，定义好悬浮球大小和icon的drawable
         int ballSize = DensityUtil.dip2px(this, 116);
 //        Drawable ballIcon = BackGroudSeletor.getdrawble("ic_floatball", this);
-        Drawable ballIcon = getResources().getDrawable(R.drawable.ic_float_ball);
+        Drawable ballIcon = getResources().getDrawable(R.drawable.selector_float_ball);
         //可以尝试使用以下几种不同的config。
 //        FloatBallCfg ballCfg = new FloatBallCfg(ballSize, ballIcon);
 //        FloatBallCfg ballCfg = new FloatBallCfg(ballSize, ballIcon, FloatBallCfg.Gravity.LEFT_CENTER,false);
