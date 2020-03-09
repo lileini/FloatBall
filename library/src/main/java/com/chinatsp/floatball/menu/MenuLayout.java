@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 import com.chinatsp.floatball.runner.ICarrier;
 import com.chinatsp.floatball.runner.ScrollRunner;
-import com.chinatsp.floatball.utils.Constant;
+import com.chinatsp.floatball.utils.Constants;
 import com.chinatsp.floatball.utils.DensityUtil;
 import com.chinatsp.floatball.utils.LogUtils;
 
@@ -76,7 +76,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int size = Constant.FLOAT_LAYOUT_W;
+        int size = Constants.FLOAT_LAYOUT_W_H;
         Log.d(TAG, "onMeasure: size= "+size);
         setMeasuredDimension(size, size);
         final int count = getChildCount();
@@ -155,7 +155,7 @@ public class MenuLayout extends ViewGroup implements ICarrier {
         this.position = position;
         mExpanded = !mExpanded;
         mMoving = true;
-        mRadius = (Constant.FLOAT_LAYOUT_W - Constant.FLOAT_BALL_W)/2;/*computeRadius(Math.abs(mToDegrees - mFromDegrees), getChildCount(),
+        mRadius = (Constants.FLOAT_LAYOUT_W_H - Constants.FLOAT_BALL_W_H)/2;/*computeRadius(Math.abs(mToDegrees - mFromDegrees), getChildCount(),
                 mChildSize, mChildPadding, MIN_RADIUS);*/
         final int start = mExpanded ? 0 : mRadius;
         final int radius = mExpanded ? mRadius : -mRadius;

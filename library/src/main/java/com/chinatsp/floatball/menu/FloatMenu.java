@@ -36,7 +36,7 @@ import com.chinatsp.floatball.FloatBallUtil;
 import com.chinatsp.floatball.libarary.R;
 import com.chinatsp.floatball.runner.ICarrier;
 import com.chinatsp.floatball.runner.ScrollRunner;
-import com.chinatsp.floatball.utils.Constant;
+import com.chinatsp.floatball.utils.Constants;
 import com.chinatsp.floatball.utils.LogUtils;
 
 public class FloatMenu extends FrameLayout implements ICarrier {
@@ -273,26 +273,26 @@ public class FloatMenu extends FrameLayout implements ICarrier {
             int dy = 0;
             switch (mPosition) {
                 case LEFT_TOP://左上
-                    dx = -mLayoutParams.x;
-                    dy = 0 - mLayoutParams.y;
+                    dx = -mLayoutParams.x + Constants.FLOAT_LAYOUT_MARGIN_W;
+                    dy = 0 - mLayoutParams.y + Constants.FLOAT_LAYOUT_MARGIN_H;
                     break;
                 case LEFT_CENTER://左中
-                    dx = -mLayoutParams.x;
+                    dx = -mLayoutParams.x + Constants.FLOAT_LAYOUT_MARGIN_W;
                     break;
                 case LEFT_BOTTOM://左下
-                    dx = -mLayoutParams.x;
-                    dy = screenHeight - mFloatBallManager.getStatusBarHeight() - mSize - mLayoutParams.y;
+                    dx = -mLayoutParams.x + Constants.FLOAT_LAYOUT_MARGIN_W;
+                    dy = screenHeight - mFloatBallManager.getStatusBarHeight() - mSize - mLayoutParams.y - Constants.FLOAT_LAYOUT_MARGIN_H;
                     break;
                 case RIGHT_TOP://右上
-                    dx = screenWidth - mSize - mLayoutParams.x;
-                    dy = 0 - mLayoutParams.y;
+                    dx = screenWidth - mSize - mLayoutParams.x - Constants.FLOAT_LAYOUT_MARGIN_W;
+                    dy = 0 - mLayoutParams.y + Constants.FLOAT_LAYOUT_MARGIN_H;
                     break;
                 case RIGHT_CENTER://右中
-                    dx = screenWidth - mSize - mLayoutParams.x;
+                    dx = screenWidth - mSize - mLayoutParams.x - Constants.FLOAT_LAYOUT_MARGIN_W;
                     break;
                 case RIGHT_BOTTOM://右下
-                    dx = screenWidth - mSize - mLayoutParams.x;
-                    dy = screenHeight - mFloatBallManager.getStatusBarHeight() - mSize - mLayoutParams.y;
+                    dx = screenWidth - mSize - mLayoutParams.x - Constants.FLOAT_LAYOUT_MARGIN_W;
+                    dy = screenHeight - mFloatBallManager.getStatusBarHeight() - mSize - mLayoutParams.y - Constants.FLOAT_LAYOUT_MARGIN_H;
                     break;
 
             }
@@ -366,11 +366,11 @@ public class FloatMenu extends FrameLayout implements ICarrier {
 
         if (wmX <= screenWidth / 3) { //左边  竖区域
 
-            wmX = Constant.FLOAT_BALL_W / 2 - mSize / 2;
-            if (wmY <= mSize / 2) {
+            wmX = Constants.FLOAT_BALL_W_H / 2 - mSize / 2;
+            if (wmY <= mSize / 2 + Constants.FLOAT_LAYOUT_MARGIN_H) {
                 position = FloatMenu.LEFT_TOP;//左上
                 wmY = floatballCenterY - mSize / 2;
-            } else if (wmY > screenHeight - statusBarHeight - mSize / 2) {
+            } else if (wmY > screenHeight - statusBarHeight - mSize / 2 - Constants.FLOAT_LAYOUT_MARGIN_H) {
                 position = FloatMenu.LEFT_BOTTOM;//左下
                 wmY = floatballCenterY - mSize / 2;
             } else {
@@ -379,12 +379,12 @@ public class FloatMenu extends FrameLayout implements ICarrier {
             }
         } else if (wmX >= screenWidth * 2 / 3) {//右边竖区域
 
-            wmX = screenWidth - mSize / 2 - Constant.FLOAT_BALL_W / 2;
-            if (wmY <= mSize / 2) {
+            wmX = screenWidth - mSize / 2 - Constants.FLOAT_BALL_W_H / 2;
+            if (wmY <= mSize / 2 + Constants.FLOAT_LAYOUT_MARGIN_H) {
                 position = FloatMenu.RIGHT_TOP;//右上
 //                wmY = floatballCenterY - halfBallSize;
                 wmY = floatballCenterY - mSize / 2;
-            } else if (wmY > screenHeight - statusBarHeight - mSize / 2) {
+            } else if (wmY > screenHeight - statusBarHeight - mSize / 2 - Constants.FLOAT_LAYOUT_MARGIN_H) {
                 position = FloatMenu.RIGHT_BOTTOM;//右下
 //                wmY = floatballCenterY - mSize + halfBallSize;
                 wmY = floatballCenterY - mSize / 2;
@@ -434,7 +434,7 @@ public class FloatMenu extends FrameLayout implements ICarrier {
      * @param gravity
      */
     public void chooseMenuItem(int gravity) {
-        Log.d(TAG, "chooseMenuItem: gravity = "+gravity);
+        Log.d(TAG, "chooseMenuItem: gravity = " + gravity);
         if (mMenuLayout.isExpanded()) {
             switch (gravity) {
                 case Gravity.LEFT:

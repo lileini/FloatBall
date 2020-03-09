@@ -19,6 +19,7 @@ import com.chinatsp.floatball.FloatBallUtil;
 //import com.huxq17.floatball.libarary.LocationService;
 import com.chinatsp.floatball.runner.ICarrier;
 import com.chinatsp.floatball.runner.ScrollRunner;
+import com.chinatsp.floatball.utils.Constants;
 import com.chinatsp.floatball.utils.MotionVelocityUtil;
 
 
@@ -40,7 +41,7 @@ public class FloatBall extends FrameLayout implements ICarrier {
     private ScrollRunner mRunner;
     private int mVelocityX, mVelocityY;
     private MotionVelocityUtil mVelocity;
-//    private boolean mSleep = false;
+    //    private boolean mSleep = false;
     private FloatBallCfg mConfig;
     private boolean mHideHalfLater = true;
     private boolean mLayoutChanged = false;
@@ -163,7 +164,7 @@ public class FloatBall extends FrameLayout implements ICarrier {
         } else if ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM) {
             y = mFloatBallManager.mScreenHeight - height - statusBarHeight;
         } else {
-            y = (mFloatBallManager.mScreenHeight- statusBarHeight) / 2 - height / 2 ;
+            y = (mFloatBallManager.mScreenHeight - statusBarHeight) / 2 - height / 2;
         }
         y = mConfig.mOffsetY != 0 ? y + mConfig.mOffsetY : y;
         if (y < 0) y = topLimit;
@@ -256,9 +257,8 @@ public class FloatBall extends FrameLayout implements ICarrier {
     }
 
     /**
-     *
      * @param smooth 是否慢慢移动
-     * @param destX 移动到的x坐标
+     * @param destX  移动到的x坐标
      */
     private void moveToX(boolean smooth, int destX) {
         int statusBarHeight = mFloatBallManager.getStatusBarHeight();
@@ -291,6 +291,7 @@ public class FloatBall extends FrameLayout implements ICarrier {
 
     /**
      * 移动到屏幕边缘
+     *
      * @param smooth
      */
     private void moveToEdge(boolean smooth) {
@@ -301,7 +302,7 @@ public class FloatBall extends FrameLayout implements ICarrier {
         int destX;
         final int minVelocity = mVelocity.getMinVelocity();
         if (mLayoutParams.x < centerX) {
-            destX =  0;
+            destX = 0;
         } else {
             destX = screenWidth - width;
         }
@@ -330,6 +331,7 @@ public class FloatBall extends FrameLayout implements ICarrier {
 
     /**
      * scrollerRunner回调
+     *
      * @param lastX
      * @param lastY
      * @param curX

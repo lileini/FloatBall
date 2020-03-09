@@ -166,7 +166,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (showMenu) {
             //2 需要显示悬浮菜单
             //2.1 初始化悬浮菜单配置，有菜单item的大小和菜单item的个数
-            int menuSize = DensityUtil.dip2px(this, 360);
+            int menuSize = DensityUtil.dip2px(this, 300);
             int menuItemSize = DensityUtil.dip2px(this, 116);
             FloatMenuCfg menuCfg = new FloatMenuCfg(menuSize, menuItemSize);
             //3 生成floatballManager
@@ -280,7 +280,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (showMenu) {
             //2 需要显示悬浮菜单
             //2.1 初始化悬浮菜单配置，有菜单item的大小和菜单item的个数
-            int menuSize = DensityUtil.dip2px(this, 360);
+            int menuSize = DensityUtil.dip2px(this, 300);
             int menuItemSize = DensityUtil.dip2px(this, 116);
             FloatMenuCfg menuCfg = new FloatMenuCfg(menuSize, menuItemSize);
             //3 生成floatballManager
