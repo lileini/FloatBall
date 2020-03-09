@@ -155,14 +155,14 @@ public class FloatBall extends FrameLayout implements ICarrier {
         int bottomLimit = mFloatBallManager.mScreenHeight - height;
         int statusBarHeight = mFloatBallManager.getStatusBarHeight();
         if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
-            x = 0;
+            x = 0 - Constants.FLOAT_SHADOW;
         } else {
-            x = mFloatBallManager.mScreenWidth - width;
+            x = mFloatBallManager.mScreenWidth - width + Constants.FLOAT_SHADOW;
         }
         if ((gravity & Gravity.TOP) == Gravity.TOP) {
-            y = topLimit;
+            y = topLimit - Constants.FLOAT_SHADOW;
         } else if ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM) {
-            y = mFloatBallManager.mScreenHeight - height - statusBarHeight;
+            y = mFloatBallManager.mScreenHeight - height - statusBarHeight + Constants.FLOAT_SHADOW;
         } else {
             y = (mFloatBallManager.mScreenHeight - statusBarHeight) / 2 - height / 2;
         }
@@ -266,9 +266,9 @@ public class FloatBall extends FrameLayout implements ICarrier {
         int height = getHeight();
         int destY = 0;
         if (mLayoutParams.y < 0) {
-            destY = 0 - mLayoutParams.y;
+            destY = 0 - mLayoutParams.y - Constants.FLOAT_SHADOW;
         } else if (mLayoutParams.y > screenHeight - height) {
-            destY = screenHeight - height - mLayoutParams.y;
+            destY = screenHeight - height - mLayoutParams.y + Constants.FLOAT_SHADOW;
         }
         if (smooth) {
             int dx = destX - mLayoutParams.x;
@@ -302,9 +302,9 @@ public class FloatBall extends FrameLayout implements ICarrier {
         int destX;
         final int minVelocity = mVelocity.getMinVelocity();
         if (mLayoutParams.x < centerX) {
-            destX = 0;
+            destX = 0 - Constants.FLOAT_SHADOW;
         } else {
-            destX = screenWidth - width;
+            destX = screenWidth - width + Constants.FLOAT_SHADOW;
         }
         moveToX(smooth, destX);
     }

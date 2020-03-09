@@ -4,11 +4,11 @@ public class Constants {
     /**
      * 悬浮球展开后距离上下的边距
      */
-    public static final int FLOAT_LAYOUT_MARGIN_H = 100;
+    public static final int FLOAT_LAYOUT_MARGIN_H = 60;
     /**
      * 悬浮球展开后距离左右的边距
      */
-    public static final int FLOAT_LAYOUT_MARGIN_W = 100;
+    public static final int FLOAT_LAYOUT_MARGIN_W = 60;
     /**
      * 悬浮球阴影宽度
      */

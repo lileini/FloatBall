@@ -303,7 +303,7 @@ public class FloatMenu extends FrameLayout implements ICarrier {
         } else {
             int dx = mLastPoint.x - mLayoutParams.x;
             int dy = mLastPoint.y - mLayoutParams.y;
-
+            Log.d(TAG, "startTransition: mLayoutParams.x= " + mLayoutParams.x + ",mLayoutParams.y= " + mLayoutParams.y + ",dx= " + dx + ",dy=" + dy);
             mRunner.start(mLayoutParams.x, mLayoutParams.y, dx,
                     dy, 250);
 
@@ -366,7 +366,7 @@ public class FloatMenu extends FrameLayout implements ICarrier {
 
         if (wmX <= screenWidth / 3) { //左边  竖区域
 
-            wmX = Constants.FLOAT_BALL_W_H / 2 - mSize / 2;
+            wmX = Constants.FLOAT_BALL_W_H / 2 - mSize / 2 - Constants.FLOAT_SHADOW;
             if (wmY <= mSize / 2 + Constants.FLOAT_LAYOUT_MARGIN_H) {
                 position = FloatMenu.LEFT_TOP;//左上
                 wmY = floatballCenterY - mSize / 2;
@@ -379,7 +379,7 @@ public class FloatMenu extends FrameLayout implements ICarrier {
             }
         } else if (wmX >= screenWidth * 2 / 3) {//右边竖区域
 
-            wmX = screenWidth - mSize / 2 - Constants.FLOAT_BALL_W_H / 2;
+            wmX = screenWidth - mSize / 2 - Constants.FLOAT_BALL_W_H / 2 + Constants.FLOAT_SHADOW;
             if (wmY <= mSize / 2 + Constants.FLOAT_LAYOUT_MARGIN_H) {
                 position = FloatMenu.RIGHT_TOP;//右上
 //                wmY = floatballCenterY - halfBallSize;
